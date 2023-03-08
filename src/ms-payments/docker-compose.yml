@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  payments-api-server:
+    image: nginx:1.23.3-alpine
+    container_name: 'payments-api-server'
+    volumes:
+      - ${PAYMENTS_API_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ${PAYMENTS_API_BASEPATH:-.}/:/var/www/html/
+    # ports:
+    #   - 80:80
+    networks:
+      - app-network
+      - payments-api-network
+    command: nginx -g "daemon off;"
+
+  payments-api-php:
+    build: ${PAYMENTS_API_BASEPATH:-.}/docker/php
+    container_name: 'payments-api-php'
+    volumes:
+      - ${PAYMENTS_API_BASEPATH:-.}/:/var/www/html/
+    networks:
+      - app-network
+      - payments-api-network
+
+  payments-api-db:
+    build: ${PAYMENTS_API_BASEPATH:-.}/docker/pgsql
+    container_name: 'payments-api-db'
+    environment:
+      POSTGRES_PASSWORD: payments-api
+      POSTGRES_DB: payments-api
+      POSTGRES_USER: payments-api
+    ports:
+      - ${PAYMENTS_API_DB_PORT:-5432:5432}
+    volumes:
+      - payments-api-db:/var/lib/postgresql/data
+    networks:
+      - payments-api-network
+
+networks:
+  app-network:
+    driver: bridge
+  payments-api-network:
+    driver: bridge
+
+volumes:
+  payments-api-db:
+    driver: 'local'

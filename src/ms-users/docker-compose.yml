@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  users-api-server:
+    image: nginx:1.23.3-alpine
+    container_name: 'users-api-server'
+    volumes:
+      - ${USERS_API_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ${USERS_API_BASEPATH:-.}/:/var/www/html/
+    networks:
+      - app-network
+      - users-api-network
+    command: nginx -g "daemon off;"
+
+  users-api-php:
+    build: ${USERS_API_BASEPATH:-.}/docker/php
+    container_name: 'users-api-php'
+    volumes:
+      - ${USERS_API_BASEPATH:-.}/:/var/www/html/
+    networks:
+      - app-network 
+      - users-api-network
+
+  users-api-db:
+    build: ${USERS_API_BASEPATH:-.}/docker/pgsql
+    container_name: 'users-api-db'
+    environment:
+      POSTGRES_PASSWORD: users-api
+      POSTGRES_DB: users-api
+      POSTGRES_USER: users-api
+    ports:
+      - ${USERS_API_DB_PORT:-5432:5432}
+    volumes:
+      - users-api-db:/var/lib/postgresql/data
+    networks:
+      - users-api-network
+
+networks:
+  app-network:
+    driver: bridge
+  users-api-network:
+    driver: bridge
+
+volumes:
+  users-api-db:
+    driver: 'local'

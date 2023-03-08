@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  proxy:
+    image: nginx:1.23.3-alpine
+    container_name: 'proxy'
+    volumes:
+      - ./docker/proxy/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - '80:80'
+    networks:
+      - app-network
+    command: nginx -g "daemon off;"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    ports:
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    volumes:
+      - /docker_conf/rabbitmq/data/:/var/lib/rabbitmq/
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
