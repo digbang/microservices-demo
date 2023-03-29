@@ -1,3 +1,3 @@
 FROM postgres:14-alpine
 
-ONBUILD RUN psql -U witwot-ms-auth -d witwot-ms-auth -c "create extension unaccent;"
+ONBUILD RUN psql -U ms-payments -d ms-payments -c "create extension unaccent;"

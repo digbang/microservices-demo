@@ -1,26 +1,38 @@
 # Setup
-1. cp .env.example .env
-2. cp ./src/ms-payments/.env.example ./src/ms-payments/.env
-3. cp ./src/ms-users/.env.example ./src/ms-users/.env
+1. cp ./src/ms-payments/.env.example ./src/ms-payments/.env
+   
+2. cp ./src/ms-users/.env.example ./src/ms-users/.env
+   
+3. ./setup.sh
+   
 4. docker-compose up -d --build
+
+5. docker-compose exec ms-users-php bash
+   1. php artisan key:generate
+   2. php artisan migrate
+
+6. docker-compose exec ms-payments-php bash
+   1. php artisan key:generate
+   2. php artisan migrate
 
 ## Containers
 1. Payments
-   - cd ./src/ms-payments
-   - docker-compose exec payments-api-php bash
-   - docker-compose exec payments-api-db bash
+   - docker-compose exec ms-payments-php bash
+   - docker-compose exec ms-payments-db bash
 
 2. Users
-   - cd ./src/ms-users
-   - docker-compose exec users-api-php bash
-   - docker-compose exec users-api-db bash
+   - docker-compose exec ms-users-php bash
+   - docker-compose exec ms-users-db bash
 
-## New Services
-1. open .env file
-2. add the new COMPOSE_FILE path, for example: src/{service}/docker-compose.yml
-3. add the new service basepath, for example {SERVICE}_API_BASEPATH=./src/{service}
-4. add the new service database port if needed, for example (5432 is the pgsql default): {SERVICE}_API_DB_PORT={port}:5432
+## Host
+This should be added to the host file:
 
+127.0.0.1 ms-payments.demo
+127.0.0.1 ms-users.demo
+
+## API URL
+- http://ms-payments.demo
+- http://ms-users.demo
 
 ## Consuming RabbitMQ
 In order to handle payment registration event you must execute the following command in the users service:

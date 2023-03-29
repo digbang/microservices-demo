@@ -1,46 +1,64 @@
 version: '3'
 
 services:
-  users-api-server:
+  ms-users-server:
     image: nginx:1.23.3-alpine
-    container_name: 'users-api-server'
+    container_name: ms-users-server
     volumes:
-      - ${USERS_API_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
-      - ${USERS_API_BASEPATH:-.}/:/var/www/html/
+      - ${MS_USERS_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ${MS_USERS_BASEPATH:-.}/:/var/www/html/
+    ports:
+      - ${MS_USERS_PORT:-80:80}
     networks:
+      - ms-users-network
       - app-network
-      - users-api-network
     command: nginx -g "daemon off;"
 
-  users-api-php:
-    build: ${USERS_API_BASEPATH:-.}/docker/php
-    container_name: 'users-api-php'
+  ms-users-php:
+    build: ${MS_USERS_BASEPATH:-.}/docker/php
+    container_name: ms-users-php
+    image: ms-users-php
     volumes:
-      - ${USERS_API_BASEPATH:-.}/:/var/www/html/
+      - ${MS_USERS_BASEPATH:-.}/:/var/www/html/
     networks:
-      - app-network 
-      - users-api-network
+      - ms-users-network
+      - app-network
 
-  users-api-db:
-    build: ${USERS_API_BASEPATH:-.}/docker/pgsql
-    container_name: 'users-api-db'
+  ms-users-db:
+    build: ${MS_USERS_BASEPATH:-.}/docker/pgsql
+    container_name: ms-users-db
+    image: ms-users-db
     environment:
-      POSTGRES_PASSWORD: users-api
-      POSTGRES_DB: users-api
-      POSTGRES_USER: users-api
+      POSTGRES_PASSWORD: ms-users
+      POSTGRES_DB: ms-users
+      POSTGRES_USER: ms-users
     ports:
-      - ${USERS_API_DB_PORT:-5432:5432}
+      - ${MS_USERS_DB_PORT:-5432:5432}
     volumes:
-      - users-api-db:/var/lib/postgresql/data
+      - ms-users-db:/var/lib/postgresql/data
     networks:
-      - users-api-network
+      - ms-users-network
+
+  ms-users-redis:
+    image: redis:7-alpine
+    container_name: ms-users-redis
+    volumes:
+      - ms-users-redis:/data
+    networks:
+      - ms-users-network
 
 networks:
   app-network:
+    name: app-network
     driver: bridge
-  users-api-network:
+  ms-users-network:
+    name: ms-users-network
     driver: bridge
 
 volumes:
-  users-api-db:
+  ms-users-db:
+    name: ms-users-db
+    driver: 'local'
+  ms-users-redis:
+    name: ms-users-redis
     driver: 'local'

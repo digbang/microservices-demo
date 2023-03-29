@@ -3,7 +3,7 @@ version: '3'
 services:
   proxy:
     image: nginx:1.23.3-alpine
-    container_name: 'proxy'
+    container_name: proxy
     volumes:
       - ./docker/proxy/conf.d/:/etc/nginx/conf.d/
     ports:
@@ -30,4 +30,5 @@ services:
 
 networks:
   app-network:
+    name: app-network
     driver: bridge

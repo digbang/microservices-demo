@@ -1,48 +1,64 @@
 version: '3'
 
 services:
-  payments-api-server:
+  ms-payments-server:
     image: nginx:1.23.3-alpine
-    container_name: 'payments-api-server'
+    container_name: ms-payments-server
     volumes:
-      - ${PAYMENTS_API_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
-      - ${PAYMENTS_API_BASEPATH:-.}/:/var/www/html/
-    # ports:
-    #   - 80:80
+      - ${MS_PAYMENTS_BASEPATH:-.}/docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ${MS_PAYMENTS_BASEPATH:-.}/:/var/www/html/
+    ports:
+      - ${MS_PAYMENTS_PORT:-80:80}
     networks:
+      - ms-payments-network
       - app-network
-      - payments-api-network
     command: nginx -g "daemon off;"
 
-  payments-api-php:
-    build: ${PAYMENTS_API_BASEPATH:-.}/docker/php
-    container_name: 'payments-api-php'
+  ms-payments-php:
+    build: ${MS_PAYMENTS_BASEPATH:-.}/docker/php
+    container_name: ms-payments-php
+    image: ms-payments-php
     volumes:
-      - ${PAYMENTS_API_BASEPATH:-.}/:/var/www/html/
+      - ${MS_PAYMENTS_BASEPATH:-.}/:/var/www/html/
     networks:
+      - ms-payments-network
       - app-network
-      - payments-api-network
 
-  payments-api-db:
-    build: ${PAYMENTS_API_BASEPATH:-.}/docker/pgsql
-    container_name: 'payments-api-db'
+  ms-payments-db:
+    build: ${MS_PAYMENTS_BASEPATH:-.}/docker/pgsql
+    container_name: ms-payments-db
+    image: ms-payments-db
     environment:
-      POSTGRES_PASSWORD: payments-api
-      POSTGRES_DB: payments-api
-      POSTGRES_USER: payments-api
+      POSTGRES_PASSWORD: ms-payments
+      POSTGRES_DB: ms-payments
+      POSTGRES_USER: ms-payments
     ports:
-      - ${PAYMENTS_API_DB_PORT:-5432:5432}
+      - ${MS_PAYMENTS_DB_PORT:-5432:5432}
     volumes:
-      - payments-api-db:/var/lib/postgresql/data
+      - ms-payments-db:/var/lib/postgresql/data
     networks:
-      - payments-api-network
+      - ms-payments-network
+
+  ms-payments-redis:
+    image: redis:7-alpine
+    container_name: ms-payments-redis
+    volumes:
+      - ms-payments-redis:/data
+    networks:
+      - ms-payments-network
 
 networks:
   app-network:
+    name: app-network
     driver: bridge
-  payments-api-network:
+  ms-payments-network:
+    name: ms-payments-network
     driver: bridge
 
 volumes:
-  payments-api-db:
+  ms-payments-db:
+    name: ms-payments-db
+    driver: 'local'
+  ms-payments-redis:
+    name: ms-payments-redis
     driver: 'local'

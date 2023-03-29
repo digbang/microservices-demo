@@ -16,9 +16,10 @@ RUN apk add --no-cache \
     curl \
     sqlite \
     postgresql-dev \
-    libzip-dev
-
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+    libzip-dev && \
+    docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg
 
 # Installing bash
 RUN apk add bash
