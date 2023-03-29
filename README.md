@@ -28,6 +28,7 @@
 This should be added to the host file:
 
 127.0.0.1 ms-payments.demo
+
 127.0.0.1 ms-users.demo
 
 ## API URL
