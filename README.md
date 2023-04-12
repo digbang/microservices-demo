@@ -24,16 +24,9 @@
    - docker-compose exec ms-users-php bash
    - docker-compose exec ms-users-db bash
 
-## Host
-This should be added to the host file:
-
-127.0.0.1 ms-payments.demo
-
-127.0.0.1 ms-users.demo
-
 ## API URL
-- http://ms-payments.demo
-- http://ms-users.demo
+- payments: http://localhost:81
+- users: http://localhost:82
 
 ## Consuming RabbitMQ
 In order to handle payment registration event you must execute the following command in the users service:
