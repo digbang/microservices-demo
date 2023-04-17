@@ -7,7 +7,7 @@ rm -f .env && touch .env
 rm -f .env.example && touch .env.example
 
 # Eliminar directorio conf.d/default.conf y crearlo de nuevo de forma recursiva
-rm -rf conf.d/default.conf && touch conf.d/default.conf
+rm -rf docker/nginx/conf.d/default.conf && touch docker/nginx/conf.d/default.conf
 
 # Un mapa para guardar los nombres de los proyectos y sus directorios
 declare -A project_directories
@@ -21,8 +21,8 @@ pgsql_port=5432
 # Variable que almacena el valor inicial del puerto del server
 server_port=81
 
-# Recorrer todos los directorios de la carpeta src
-for dir in src/*; do
+# Recorrer todos los directorios de la carpeta services
+for dir in services/*; do
     # Eliminar el valor de la variable project_name
     unset project_name
 
@@ -82,20 +82,20 @@ for project_name in "${!project_directories[@]}"; do
     dashed_project_name=$(echo "$project_name" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g')
 
     # Obtener el contenido del archivo server-block.txt y reemplazar las ocurrencias de "project-name" por el valor de la variable dashed_project_name
-    server_block=$(sed -E "s/project-name/$dashed_project_name/g" conf.d/default.conf.example)
+    server_block=$(sed -E "s/project-name/$dashed_project_name/g" docker/nginx/conf.d/default.conf.template)
 
     # Reemplazar las ocurrencias de "server-port" por el valor de la variable server_port
     server_block=$(echo "$server_block" | sed -E "s/server-port/$server_port/g")
 
-    # Agregar el contenido de la variable server_block al archivo conf.d/default.conf
-    echo "$server_block" >> conf.d/default.conf
+    # Agregar el contenido de la variable server_block al archivo docker/nginx/conf.d/default.conf
+    echo "$server_block" >> docker/nginx/conf.d/default.conf
 
-    # Agregar una salto de línea al archivo conf.d/default.conf
-    echo "" >> conf.d/default.conf
+    # Agregar una salto de línea al archivo docker/nginx/conf.d/default.conf
+    echo "" >> docker/nginx/conf.d/default.conf
 
     # Sumarle 1 a la variable server_port
     server_port=$((server_port+1))
 done
 
-# Eliminar último salto de línea del archivo conf.d/default.conf
-sed -i '$ d' conf.d/default.conf
+# Eliminar último salto de línea del archivo docker/nginx/conf.d/default.conf
+sed -i '$ d' docker/nginx/conf.d/default.conf

@@ -1,13 +1,11 @@
 version: '3'
 
 services:
-  proxy:
+  api-gateway:
     image: nginx:1.23.3-alpine
-    container_name: proxy
+    container_name: api-gateway
     volumes:
-      - ./docker/proxy/conf.d/:/etc/nginx/conf.d/
-    ports:
-      - '80:80'
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - app-network
     command: nginx -g "daemon off;"

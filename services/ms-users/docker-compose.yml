@@ -58,7 +58,7 @@ networks:
 volumes:
   ms-users-db:
     name: ms-users-db
-    driver: 'local'
+    driver: local
   ms-users-redis:
     name: ms-users-redis
-    driver: 'local'
+    driver: local

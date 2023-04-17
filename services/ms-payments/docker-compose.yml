@@ -58,7 +58,7 @@ networks:
 volumes:
   ms-payments-db:
     name: ms-payments-db
-    driver: 'local'
+    driver: local
   ms-payments-redis:
     name: ms-payments-redis
-    driver: 'local'
+    driver: local
