@@ -55,6 +55,9 @@ echo "COMPOSE_FILE=$joined_docker_compose_files" >> .env
 # Establecer el separador de dos puntos como valor de la variable COMPOSE_PATH_SEPARATOR
 echo "COMPOSE_PATH_SEPARATOR=:" >> .env
 
+# Establecer una variable para almacenar los puertos de los servers
+server_ports=""
+
 # Recorrer todos los valores del mapa project_directories
 for project_name in "${!project_directories[@]}"; do
     # Agregar una salto de línea al archivo .env
@@ -68,9 +71,6 @@ for project_name in "${!project_directories[@]}"; do
 
     # Establecer el valor de la variable "{env_project_name}_BASEPATH" con el valor de la variable project_dir
     echo "${env_project_name}_BASEPATH=$project_dir" >> .env
-
-    # Establecer el valor de la variable "{env_project_name}_PORT" con el valor de la variable server_port y sumarle 1
-    echo "${env_project_name}_PORT=$((server_port)):80" >> .env
 
     # Establecer el valor de la variable "{env_project_name}_DB_PORT" con el valor de la variable pgsql_port y sumarle 1
     echo "${env_project_name}_DB_PORT=$((pgsql_port++)):5432" >> .env
@@ -93,9 +93,17 @@ for project_name in "${!project_directories[@]}"; do
     # Agregar una salto de línea al archivo docker/nginx/conf.d/default.conf
     echo "" >> docker/nginx/conf.d/default.conf
 
+    server_ports="$server_ports\n      - \"$server_port:$server_port\""
+
     # Sumarle 1 a la variable server_port
     server_port=$((server_port+1))
 done
 
 # Eliminar último salto de línea del archivo docker/nginx/conf.d/default.conf
 sed -i '$ d' docker/nginx/conf.d/default.conf
+
+# Obtener el contenido del archivo docker-compose.yml.template
+docker_compose_yml=$(sed -E "s/server-ports/$server_ports/g" docker-compose.yml.template)
+
+# Agregar el contenido de la variable docker_compose_yml al archivo docker-compose.yml
+echo "$docker_compose_yml" > docker-compose.yml

@@ -4,9 +4,7 @@ services:
   api-gateway:
     image: nginx:1.23.3-alpine
     container_name: api-gateway
-    ports: 
-      - "81:81"
-      - "82:82"
+    ports: server-ports
     volumes:
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
