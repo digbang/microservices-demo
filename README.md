@@ -1,33 +1,80 @@
-# Setup
-1. cp ./src/ms-payments/.env.example ./src/ms-payments/.env
-   
-2. cp ./src/ms-users/.env.example ./src/ms-users/.env
-   
-3. ./setup.sh
-   
-4. docker-compose up -d --build
+# Microservices Demo
 
-5. docker-compose exec ms-users-php bash
-   1. php artisan key:generate
-   2. php artisan migrate
+## Environment files
+Copy the **.env.example** files on each service:
 
-6. docker-compose exec ms-payments-php bash
-   1. php artisan key:generate
-   2. php artisan migrate
+` cp services/ms-payments/.env.example services/ms-payments/.env `
 
-## Containers
-1. Payments
-   - docker-compose exec ms-payments-php bash
-   - docker-compose exec ms-payments-db bash
+` cp services/ms-users/.env.example services/ms-users/.env `
 
-2. Users
-   - docker-compose exec ms-users-php bash
-   - docker-compose exec ms-users-db bash
+---
 
-## API URL
-- payments: http://localhost:81
-- users: http://localhost:82
+## Microservices Sync
+` ./scripts/services-sync.sh `
 
-## Consuming RabbitMQ
-In order to handle payment registration event you must execute the following command in the users service:
-php artisan rabbitmq:consume "App\RabbitMQ\Handler\PaymentRegisteredHandler"
+---
+
+## Building
+` docker-compose up -d --build `
+
+---
+
+## Keys & Migrations
+` docker-compose run ms-payments-php php artisan key:generate `
+
+` docker-compose run ms-payments-php php artisan migrate `
+
+` docker-compose run ms-users-php php artisan key:generate `
+
+` docker-compose run ms-users-php php artisan migrate `
+
+---
+
+## API Gateway
+Base URL: **http://localhost:8000**
+
+### Services
+
+- **Authentication**
+  - GET /me
+  - POST /login
+  - POST /logout
+  - POST /refresh
+
+- **Users**
+  - GET /users
+  - POST /users
+  - PATCH /users/{user_id}/enable
+  - PATCH /users/{user_id}/disable
+
+- **Payments**
+  - POST /payments
+
+---
+
+## JSON Web Token (JWT)
+Perform a GET request to http://localhost:8001/consumers/jwt_auth_issuer/jwt and you will get a similar JSON to the following one:
+
+```
+{
+	"next": null,
+	"data": [
+		{
+			"key": "********************************",
+			"consumer": {
+				"id": "0076ae4b-0648-5847-8ee6-1bf0a6049c97"
+			},
+			"rsa_public_key": null,
+			"tags": null,
+			"created_at": 1684847348,
+			"id": "8fd98bab-9ff9-4661-8162-51e2b483e01f",
+			"algorithm": "HS256",
+			"secret": "********************************"
+		}
+	]
+}
+```
+
+- In the service ` ms-users ` replace the .env variable ` JWT_ISSUER ` value with the ` key ` value.
+
+- In the service ` ms-users ` replace the .env variable ` JWT_SECRET ` value with the ` secret ` value.

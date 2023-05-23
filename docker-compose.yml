@@ -1,31 +1,24 @@
 version: "3"
 
 services:
-  api-gateway:
-    image: nginx:1.23.3-alpine
-    container_name: api-gateway
-    ports: 
-      - "81:81"
-      - "82:82"
-    volumes:
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
-    networks:
-      - app-network
-    command: nginx -g "daemon off;"
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: "rabbitmq"
-    environment:
-      RABBITMQ_DEFAULT_USER: "guest"
-      RABBITMQ_DEFAULT_PASS: "guest"
+  kong:
+    image: kong:3.0-alpine
+    container_name: kong
     ports:
-      # AMQP protocol port
-      - "5672:5672"
-      # HTTP management UI
-      - "15672:15672"
+      - 8000:8000
+      - 8443:8443
+      - 8001:8001
+      - 8444:8444
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
     volumes:
-      - /docker_conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./docker/kong/declarative/kong.yml:/usr/local/kong/declarative/kong.yml
     networks:
       - app-network
 

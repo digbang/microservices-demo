@@ -1,0 +1,70 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: authentication
+    host: ms-users-server
+    path: /api/auth
+    routes:
+      - name: login
+        methods:
+          - POST
+        paths:
+          - /login
+        strip_path: false
+
+      - name: logout
+        methods:
+          - POST
+        paths:
+          - /logout
+        plugins:
+          - name: jwt
+        strip_path: false
+
+      - name: refresh
+        methods:
+          - POST
+        paths:
+          - /refresh
+        plugins:
+          - name: jwt
+        strip_path: false
+
+      - name: me
+        methods:
+          - GET
+        paths:
+          - /me
+        plugins:
+          - name: jwt
+        strip_path: false
+
+  - name: users
+    host: ms-users-server
+    path: /api/v1
+    plugins:
+      - name: jwt
+    routes:
+      - name: users
+        paths:
+          - /users
+        strip_path: false
+
+  - name: payments
+    host: ms-payments-server
+    path: /api/v1
+    plugins:
+      - name: jwt
+    routes:
+      - name: payments
+        paths:
+          - /payments
+        strip_path: false
+
+consumers:
+  - username: jwt_auth_issuer
+
+jwt_secrets:
+  - consumer: jwt_auth_issuer
+    algorithm: HS256

@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   ms-users-server:
@@ -10,8 +10,8 @@ services:
     ports:
       - ${SERVER_PORT:-}:80
     networks:
-      - ms-users-network
       - app-network
+      - ms-users-network
     command: nginx -g "daemon off;"
 
   ms-users-php:
@@ -21,8 +21,8 @@ services:
     volumes:
       - ${MS_USERS_BASEPATH:-.}/:/var/www/html/
     networks:
-      - ms-users-network
       - app-network
+      - ms-users-network
 
   ms-users-db:
     build: ${MS_USERS_BASEPATH:-.}/docker/pgsql
@@ -39,14 +39,6 @@ services:
     networks:
       - ms-users-network
 
-  ms-users-redis:
-    image: redis:7-alpine
-    container_name: ms-users-redis
-    volumes:
-      - ms-users-redis:/data
-    networks:
-      - ms-users-network
-
 networks:
   app-network:
     name: app-network
@@ -58,7 +50,4 @@ networks:
 volumes:
   ms-users-db:
     name: ms-users-db
-    driver: local
-  ms-users-redis:
-    name: ms-users-redis
     driver: local

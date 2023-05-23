@@ -3,11 +3,8 @@
 # Eliminar el archivo .env y crearlo de nuevo
 rm -f .env && touch .env
 
-# Eliminar el archivo .env.example y crearlo de nuevo
-rm -f .env.example && touch .env.example
-
-# Eliminar directorio conf.d/default.conf y crearlo de nuevo de forma recursiva
-rm -rf docker/nginx/conf.d/default.conf && touch docker/nginx/conf.d/default.conf
+# Eliminar el archivo .env.example
+rm -f .env.example
 
 # Un mapa para guardar los nombres de los proyectos y sus directorios
 declare -A project_directories
@@ -17,9 +14,6 @@ docker_compose_files=("docker-compose.yml")
 
 # Variable que almacena el valor inicial del puerto de la base de datos PGSQL
 pgsql_port=5432
-
-# Variable que almacena el valor inicial del puerto del server
-server_port=81
 
 # Recorrer todos los directorios de la carpeta services
 for dir in services/*; do
@@ -55,9 +49,6 @@ echo "COMPOSE_FILE=$joined_docker_compose_files" >> .env
 # Establecer el separador de dos puntos como valor de la variable COMPOSE_PATH_SEPARATOR
 echo "COMPOSE_PATH_SEPARATOR=:" >> .env
 
-# Establecer una variable para almacenar los puertos de los servers
-server_ports=""
-
 # Recorrer todos los valores del mapa project_directories
 for project_name in "${!project_directories[@]}"; do
     # Agregar una salto de línea al archivo .env
@@ -76,34 +67,5 @@ for project_name in "${!project_directories[@]}"; do
     echo "${env_project_name}_DB_PORT=$((pgsql_port++)):5432" >> .env
 
     # Clonar el .env del directorio raíz y llamarlo .env.example
-    cp .env .env.example
-
-    # Transformar el nombre del proyecto a dashed case. Guardarlo en la variable dashed_project_name
-    dashed_project_name=$(echo "$project_name" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g')
-
-    # Obtener el contenido del archivo server-block.txt y reemplazar las ocurrencias de "project-name" por el valor de la variable dashed_project_name
-    server_block=$(sed -E "s/project-name/$dashed_project_name/g" docker/nginx/conf.d/default.conf.template)
-
-    # Reemplazar las ocurrencias de "server-port" por el valor de la variable server_port
-    server_block=$(echo "$server_block" | sed -E "s/server-port/$server_port/g")
-
-    # Agregar el contenido de la variable server_block al archivo docker/nginx/conf.d/default.conf
-    echo "$server_block" >> docker/nginx/conf.d/default.conf
-
-    # Agregar una salto de línea al archivo docker/nginx/conf.d/default.conf
-    echo "" >> docker/nginx/conf.d/default.conf
-
-    server_ports="$server_ports\n      - \"$server_port:$server_port\""
-
-    # Sumarle 1 a la variable server_port
-    server_port=$((server_port+1))
+    cp -p .env .env.example
 done
-
-# Eliminar último salto de línea del archivo docker/nginx/conf.d/default.conf
-sed -i '$ d' docker/nginx/conf.d/default.conf
-
-# Obtener el contenido del archivo docker-compose.yml.template
-docker_compose_yml=$(sed -E "s/server-ports/$server_ports/g" docker-compose.yml.template)
-
-# Agregar el contenido de la variable docker_compose_yml al archivo docker-compose.yml
-echo "$docker_compose_yml" > docker-compose.yml
