@@ -57,21 +57,21 @@ Perform a GET request to http://localhost:8001/consumers/jwt_auth_issuer/jwt and
 
 ```
 {
-	"next": null,
-	"data": [
-		{
-			"key": "********************************",
-			"consumer": {
-				"id": "0076ae4b-0648-5847-8ee6-1bf0a6049c97"
-			},
-			"rsa_public_key": null,
-			"tags": null,
-			"created_at": 1684847348,
-			"id": "8fd98bab-9ff9-4661-8162-51e2b483e01f",
-			"algorithm": "HS256",
-			"secret": "********************************"
-		}
-	]
+  "next": null,
+  "data": [
+    {
+      "key": "********************************",
+        "consumer": {
+          "id": "0076ae4b-0648-5847-8ee6-1bf0a6049c97"
+        },
+        "rsa_public_key": null,
+        "tags": null,
+        "created_at": 1684847348,
+        "id": "8fd98bab-9ff9-4661-8162-51e2b483e01f",
+        "algorithm": "HS256",
+        "secret": "********************************"
+    }
+  ]
 }
 ```
 
